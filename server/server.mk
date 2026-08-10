@@ -2,7 +2,7 @@
 	musics test-server test-server-docker test-integration test-load test-load-features
 
 install-server:
-	docker compose build backend
+    cd server && npm install
 
 run-server:
 	cd server && npm run dev
