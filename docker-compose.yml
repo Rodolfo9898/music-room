@@ -1,0 +1,46 @@
+services:
+  mariadb:
+    image: mariadb:11
+    container_name: music-room-db
+    ports:
+      - "3306:3306"
+    env_file:
+      - ./server/.env
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 3s
+      timeout: 5s
+      retries: 20
+
+  backend:
+    build:
+      context: ./server
+    container_name: music-room-backend
+    ports:
+      - "8080:8080"
+    env_file:
+      - ./server/.env
+    environment:
+      DB_HOST: mariadb
+    volumes:
+      - ./server/musics:/app/musics:ro
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:8080').then(r => { if (!r.ok) process.exit(1) }).catch(() => process.exit(1))",
+        ]
+      interval: 3s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+
+volumes:
+  mariadb_data:

@@ -1,0 +1,9 @@
+# SERVER RELATED
+
+node_modules
+dist
+.env
+/musics/
+/__MACOSX/
+/.idea/
+test/load/feature-ramp-up-results.json

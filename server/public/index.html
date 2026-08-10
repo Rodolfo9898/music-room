@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Room — Dev Room Monitor</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0f0f0f;
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        h1 { margin-bottom: 0.3rem; font-size: 1.6rem; color: #fff; }
+        .subtitle { color: #888; font-size: 0.85rem; margin-bottom: 1.5rem; }
+        .layout { max-width: 800px; margin: 0 auto; }
+        .status-bar {
+            display: flex; gap: 1rem; align-items: center;
+            margin-bottom: 1.5rem; font-size: 0.85rem; color: #aaa;
+        }
+        .status-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            display: inline-block; margin-right: 0.3rem;
+        }
+        .status-dot.connected { background: #4caf50; }
+        .status-dot.disconnected { background: #f44336; }
+        .status-dot.connecting { background: #ff9800; }
+
+        .room-card {
+            background: #1a1a2e;
+            border: 1px solid #2a2a4a;
+            border-radius: 8px;
+            padding: 1rem 1.2rem;
+            margin-bottom: 0.8rem;
+        }
+        .room-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        .room-name { font-size: 1.1rem; font-weight: 600; color: #fff; }
+        .room-id { color: #666; font-size: 0.8rem; }
+        .room-details {
+            display: flex; gap: 1.5rem; flex-wrap: wrap;
+            font-size: 0.85rem; color: #aaa;
+        }
+        .room-details strong { color: #ccc; }
+        .badge {
+            display: inline-block; padding: 0.15rem 0.5rem;
+            border-radius: 4px; font-size: 0.75rem; font-weight: 500;
+        }
+        .badge-playing { background: #1b5e20; color: #a5d6a7; }
+        .badge-paused { background: #e65100; color: #ffcc80; }
+        .badge-idle { background: #2a2a4a; color: #888; }
+
+        .empty-state {
+            text-align: center; padding: 3rem; color: #555;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <h1>🎵 Room Monitor</h1>
+        <p class="subtitle">Dev tool — live subscription to all open rooms</p>
+
+        <div class="status-bar">
+            <span><span class="status-dot connecting" id="status-dot"></span> <span id="ws-status">connecting…</span></span>
+            <span>Rooms: <strong id="room-count">0</strong></span>
+        </div>
+
+        <div id="rooms-container">
+            <div class="empty-state">Waiting for subscription data…</div>
+        </div>
+    </div>
+
+    <script>
+        const GRAPHQL_WS_PROTOCOL = 'graphql-transport-ws';
+        const WS_HOSTNAME = location.hostname || 'localhost';
+        const WS_PORT = location.port || '8080';
+        const WS_URL = `ws://${WS_HOSTNAME}:${WS_PORT}/dev-subscriptions`;
+
+        const statusDot = document.getElementById('status-dot');
+        const wsStatus = document.getElementById('ws-status');
+        const roomCount = document.getElementById('room-count');
+        const roomsContainer = document.getElementById('rooms-container');
+
+        function setStatus(state) {
+            statusDot.className = 'status-dot ' + state;
+            wsStatus.textContent = state === 'connected' ? 'connected' : state === 'connecting' ? 'connecting…' : 'disconnected';
+        }
+
+        function renderRooms(rooms) {
+            roomCount.textContent = rooms.length;
+            if (rooms.length === 0) {
+                roomsContainer.innerHTML = '<div class="empty-state">No rooms open</div>';
+                return;
+            }
+            roomsContainer.innerHTML = rooms.map(room => {
+                const statusClass = room.status === 'PLAYING' ? 'badge-playing' : room.status === 'PAUSED' ? 'badge-paused' : 'badge-idle';
+                const memberCount = room.memberIds ? room.memberIds.length : 0;
+                return `
+                    <div class="room-card">
+                        <div class="room-header">
+                            <span class="room-name">${escapeHtml(room.name)}</span>
+                            <span class="room-id">#${room.id}</span>
+                        </div>
+                        <div class="room-details">
+                            <span><span class="badge ${statusClass}">${room.status}</span></span>
+                            <span>Host: <strong>${room.hostId}</strong></span>
+                            <span>Members: <strong>${memberCount}</strong> (${room.memberIds ? room.memberIds.join(', ') : '-'})</span>
+                            <span>Track: <strong>${room.currentMusicId ?? 'none'}</strong></span>
+                            <span>Index: <strong>${room.currentIndex ?? '-'}</strong></span>
+                            <span>Queue: <strong>${room.playlist ? room.playlist.length : 0}</strong> track(s)</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function connect() {
+            setStatus('connecting');
+            const ws = new WebSocket(WS_URL, GRAPHQL_WS_PROTOCOL);
+
+            ws.onopen = () => {
+                ws.send(JSON.stringify({ type: 'connection_init', payload: {} }));
+            };
+
+            ws.onmessage = (event) => {
+                const msg = JSON.parse(event.data);
+                if (msg.type === 'connection_ack') {
+                    setStatus('connected');
+                    // Subscribe to rooms
+                    ws.send(JSON.stringify({
+                        id: '1',
+                        type: 'subscribe',
+                        payload: {
+                            query: 'subscription { rooms { id name hostId memberIds status currentMusicId currentIndex playlist { musicId addedByUserId } } }'
+                        }
+                    }));
+                    return;
+                }
+                if (msg.type === 'next' && msg.id === '1') {
+                    const rooms = msg.payload?.data?.rooms ?? [];
+                    renderRooms(rooms);
+                }
+            };
+
+            ws.onerror = () => setStatus('disconnected');
+            ws.onclose = () => {
+                setStatus('disconnected');
+                setTimeout(connect, 3000);
+            };
+        }
+
+        connect();
+    </script>
+</body>
+</html>
