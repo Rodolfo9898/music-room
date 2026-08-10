@@ -635,7 +635,7 @@ class MusicPlayerController extends ChangeNotifier {
   }
 
   Future<bool> setQueue(List<MusicTrack> tracks) async {
-    if (_activeRoomId == null) {
+    if (_activeRoomId == null || isRoomHost) {
       final created = await _createRoom();
       if (!created) return false;
     }
