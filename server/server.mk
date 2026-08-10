@@ -1,11 +1,17 @@
 .PHONY: install-server run-server backend-up db-up db-down db-reset db-migrate \
 	musics test-server test-server-docker test-integration test-load test-load-features
 
+REMOTE_DB ?= 0
+
 install-server:
-    cd server && npm install
+	cd server && npm install
 
 run-server:
-	cd server && npm run dev
+    ifeq ($(REMOTE_DB),1)
+        docker compose run --rm --no-deps --service-ports backend npm run dev
+    else
+        docker compose up --build backend
+    endif
 
 backend-up: musics
 	docker compose up -d --build --wait backend

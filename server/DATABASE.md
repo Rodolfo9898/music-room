@@ -10,6 +10,9 @@ From the repository root:
 make setup
 ```
 
+For production operation of database + backend services, use the runbook in
+[`docs/PRODUCTION.md`](RUN.md).
+
 Or start MariaDB and migrate explicitly:
 
 ```sh
@@ -19,6 +22,9 @@ make db-migrate
 
 Connection settings are read from the ignored `server/.env`. Copy
 `server/.env-example`, provide strong local values, and keep it untracked.
+Compose-first local usage expects `DB_HOST=mariadb`. For a remote database host,
+set `DB_HOST`/`DB_PORT`/credentials accordingly and run backend with
+`make run-server REMOTE_DB=1`.
 `npm run db:migrate` applies all pending migrations and the initial catalog
 seed. `make db-reset` removes the Docker database volume and reconstructs it
 from those migrations.

@@ -8,7 +8,8 @@ cd server && npm run db:migrate   # uses the DB_* values from .env
 
 The runner applies the `*.sql` files in this folder in order, and records the applied ones in the `schema_migrations` table — re-running the command never applies the same migration twice.
 
-Local database: start it first with `docker compose up -d --wait` (or `make db-up`), with `.env` pointing at `127.0.0.1`.
+Local compose database: start it first with `docker compose up -d --wait` (or `make db-up`), with `.env` pointing at `mariadb`.
+Remote database: set `DB_HOST`, `DB_PORT`, and credentials to the remote server and run the backend in no-deps mode (`make run-server REMOTE_DB=1`) when you do not want local compose MariaDB.
 
 ## Add a migration
 

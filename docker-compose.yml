@@ -2,8 +2,6 @@ services:
   mariadb:
     image: mariadb:11
     container_name: music-room-db
-    ports:
-      - "3306:3306"
     env_file:
       - ./server/.env
     volumes:

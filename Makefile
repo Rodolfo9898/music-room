@@ -14,7 +14,7 @@ help:
 	@printf "  make project-up       Build and start the Docker backend and database\n"
 	@printf "  make project-down     Stop the Docker backend and database\n"
 	@printf "  make backend-up       Build and start the Docker backend (and its database)\n"
-	@printf "  make run-server       Run the Node/Express server\n"
+	@printf "  make run-server       Run backend in Docker (use REMOTE_DB=1 to skip local DB dependency)\n"
 	@printf "  make run-app          Choose a Flutter device/backend and run the app\n"
 	@printf "  make install          Install server and Flutter dependencies\n"
 	@printf "  make install-server   Install server dependencies\n"
