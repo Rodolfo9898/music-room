@@ -233,6 +233,16 @@ export class RoomStore {
 		return result;
 	}
 
+	playTrack(roomId: number, userId: number, index: number): StoreResult {
+		const room = this.rooms.get(roomId);
+		if (!room) return { ok: false, message: `Room ${roomId} not found` };
+		const result = room.playTrack(userId, index);
+		if (!result.ok) return result;
+		this.stopPlayback(room);
+		void this.startPlayback(room);
+		return result;
+	}
+
 	seek(roomId: number, userId: number, positionMs: number): StoreResult {
 		const room = this.rooms.get(roomId);
 		if (!room) return { ok: false, message: `Room ${roomId} not found` };

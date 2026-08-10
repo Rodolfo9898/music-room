@@ -146,6 +146,7 @@ type Mutation {
     addToQueue(roomId: Int!, musicId: Int!): ActionResult!
     setQueue(roomId: Int!, musicIds: [Int!]!): ActionResult!
     play(roomId: Int!): ActionResult!
+    playTrack(roomId: Int!, index: Int!): ActionResult!
     pause(roomId: Int!): ActionResult!
     next(roomId: Int!): ActionResult!
     previous(roomId: Int!): ActionResult!

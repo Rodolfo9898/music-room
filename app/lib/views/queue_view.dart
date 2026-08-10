@@ -31,6 +31,9 @@ class QueueView extends StatelessWidget {
     final queue = player.queue;
     final currentIndex = player.queueIndex;
     final linkedVoteEventId = player.linkedVoteEventId;
+    // Changing the room's current track is reserved to the host; members can
+    // only view the queue.
+    final canControl = !player.hasActiveRoom || player.isRoomHost;
 
     return Scaffold(
       backgroundColor: const Color(0xFF090B11),
@@ -60,7 +63,9 @@ class QueueView extends StatelessWidget {
                         track: track,
                         isActive: isActive,
                         isPlaying: isActive && player.isPlaying,
-                        onTap: () => player.playQueueTrack(index),
+                        onTap: canControl
+                            ? () => player.playQueueTrack(index)
+                            : null,
                       );
                     },
                   ),
@@ -142,7 +147,7 @@ class _QueueTrackTile extends StatelessWidget {
   final MusicTrack track;
   final bool isActive;
   final bool isPlaying;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   const _QueueTrackTile({
     required this.track,

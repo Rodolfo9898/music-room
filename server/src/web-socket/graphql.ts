@@ -187,6 +187,11 @@ export const resolvers = {
 			const result = roomStore.play(args.roomId, await effectiveController(args.roomId, user.id, context));
 			return wrapAction(result, roomStore.getRoom(args.roomId)?.toState() ?? null);
 		},
+		playTrack: async (_parent: unknown, args: { roomId: number; index: number }, context: SubscriptionContext) => {
+			const user = requireUser(context);
+			const result = roomStore.playTrack(args.roomId, await effectiveController(args.roomId, user.id, context), args.index);
+			return wrapAction(result, roomStore.getRoom(args.roomId)?.toState() ?? null);
+		},
 		pause: async (_parent: unknown, args: { roomId: number }, context: SubscriptionContext) => {
 			const user = requireUser(context);
 			const result = roomStore.pause(args.roomId, await effectiveController(args.roomId, user.id, context));

@@ -24,6 +24,7 @@ test('only the host can add music, play, pause, next, previous, seek, and set th
 	assert.equal(room.previous(MEMBER).ok, false);
 	assert.equal(room.seek(MEMBER, 1000).ok, false);
 	assert.equal(room.setQueue(MEMBER, [1, 2]).ok, false);
+	assert.equal(room.playTrack(MEMBER, 0).ok, false);
 
 	assert.equal(room.addMusic(HOST, 200).ok, true);
 	assert.equal(room.play(HOST).ok, true);
@@ -192,4 +193,18 @@ test('reorderQueue keeps the currently playing track untouched and only reorders
 	// Already-played prefix (10, 20) is preserved, followed by the new ranking's
 	// upcoming order (30, 40) with 10 excluded since it was already played.
 	assert.deepEqual(ids, [10, 20, 30, 40]);
+});
+
+test('playTrack jumps to a valid queue index and rejects out-of-range indexes', () => {
+	const room = newRoomWithTrack();
+	room.addMusic(HOST, 200);
+	room.addMusic(HOST, 300);
+
+	assert.equal(room.playTrack(HOST, 2).ok, true);
+	assert.equal(room.currentIndex, 2);
+	assert.equal(room.status, 'PLAYING');
+
+	assert.equal(room.playTrack(HOST, -1).ok, false);
+	assert.equal(room.playTrack(HOST, 3).ok, false);
+	assert.equal(room.currentIndex, 2);
 });

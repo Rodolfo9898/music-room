@@ -183,6 +183,17 @@ export class Room {
 		return { ok: true };
 	}
 
+	playTrack(userId: number, index: number): StoreResult {
+		if (!this.isHost(userId)) return { ok: false, message: 'Only the host can change the track' };
+		const items = this.playlist.items;
+		if (index < 0 || index >= items.length) return { ok: false, message: 'Invalid track index' };
+		this._currentIndex = index;
+		this._trackBuffer = [];
+		this.setPlaybackTime(0);
+		this._status = 'PLAYING';
+		return { ok: true };
+	}
+
 	seek(userId: number, positionMs: number): StoreResult {
 		if (!this.isHost(userId)) return { ok: false, message: 'Only the host can seek' };
 		if (this._currentIndex === null) return { ok: false, message: 'No active track' };

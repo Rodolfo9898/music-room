@@ -33,6 +33,19 @@ const String _playMutation = r'''
   }
 ''';
 
+const String _playTrackMutation = r'''
+  mutation PlayerPlayTrack($roomId: Int!, $index: Int!) {
+    playTrack(roomId: $roomId, index: $index) {
+      success
+      message
+      room {
+        currentMusicId
+        status
+      }
+    }
+  }
+''';
+
 const String _addToQueueMutation = r'''
   mutation PlayerAddToQueue($roomId: Int!, $musicId: Int!) {
     addToQueue(roomId: $roomId, musicId: $musicId) {
@@ -655,6 +668,19 @@ class MusicPlayerController extends ChangeNotifier {
     if (index < 0 || index >= _queue.length) {
       return;
     }
+
+    if (_activeRoomId != null) {
+      // In a room, changing the current track is a host-only action that must
+      // go through the server so every member stays in sync; playing locally
+      // would let any member desync their playback from the room.
+      await _sendRoomAction(
+        _playTrackMutation,
+        'playTrack',
+        variables: {'index': index},
+      );
+      return;
+    }
+
     final track = _queue[index];
     final catalogIndex = _tracks.indexWhere((t) => t.id == track.id);
     if (catalogIndex >= 0) {
