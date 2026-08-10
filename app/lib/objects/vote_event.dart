@@ -72,4 +72,3 @@ class VoteEvent {
       'Your current invitation, location, or time does not satisfy this voting license.',
   };
 }
-

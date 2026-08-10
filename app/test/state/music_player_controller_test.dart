@@ -36,14 +36,18 @@ void main() {
     durationController = StreamController<Duration>.broadcast();
     completeController = StreamController<void>.broadcast();
 
-    when(() => mockPlayer.onPlayerStateChanged)
-        .thenAnswer((_) => stateController.stream);
-    when(() => mockPlayer.onPositionChanged)
-        .thenAnswer((_) => positionController.stream);
-    when(() => mockPlayer.onDurationChanged)
-        .thenAnswer((_) => durationController.stream);
-    when(() => mockPlayer.onPlayerComplete)
-        .thenAnswer((_) => completeController.stream);
+    when(
+      () => mockPlayer.onPlayerStateChanged,
+    ).thenAnswer((_) => stateController.stream);
+    when(
+      () => mockPlayer.onPositionChanged,
+    ).thenAnswer((_) => positionController.stream);
+    when(
+      () => mockPlayer.onDurationChanged,
+    ).thenAnswer((_) => durationController.stream);
+    when(
+      () => mockPlayer.onPlayerComplete,
+    ).thenAnswer((_) => completeController.stream);
     when(() => mockPlayer.stop()).thenAnswer((_) async {});
     when(() => mockPlayer.pause()).thenAnswer((_) async {});
     when(() => mockPlayer.resume()).thenAnswer((_) async {});
@@ -153,18 +157,21 @@ void main() {
   });
 
   group('togglePlay', () {
-    test('starts playback from the current index when nothing has played yet', () async {
-      mockTracksQuery([
-        {'id': 1, 'title': 'Song A'},
-      ]);
-      final controller = makeController();
-      await controller.loadTracks();
+    test(
+      'starts playback from the current index when nothing has played yet',
+      () async {
+        mockTracksQuery([
+          {'id': 1, 'title': 'Song A'},
+        ]);
+        final controller = makeController();
+        await controller.loadTracks();
 
-      await controller.togglePlay();
+        await controller.togglePlay();
 
-      expect(controller.currentTrack?.id, 1);
-      verify(() => mockPlayer.play(any())).called(1);
-    });
+        expect(controller.currentTrack?.id, 1);
+        verify(() => mockPlayer.play(any())).called(1);
+      },
+    );
 
     test('pauses when currently playing', () async {
       mockTracksQuery([

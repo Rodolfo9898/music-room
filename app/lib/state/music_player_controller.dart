@@ -240,6 +240,7 @@ class MusicPlayerController extends ChangeNotifier {
   int? get linkedVoteEventId => _linkedVoteEventId;
   bool get isRoomHost =>
       hasActiveRoom && _currentUserId != null && _hostId == _currentUserId;
+
   /// Members of the active room excluding the current user, suitable for
   /// host-transfer target selection.
   List<int> get otherRoomMemberIds =>
@@ -349,7 +350,8 @@ class MusicPlayerController extends ChangeNotifier {
             if (rawMemberIds is List) {
               _memberIds = rawMemberIds.whereType<int>().toList();
             }
-            if (_currentUserId != null && !_memberIds.contains(_currentUserId)) {
+            if (_currentUserId != null &&
+                !_memberIds.contains(_currentUserId)) {
               await _clearActiveRoomState('You are no longer in this room.');
               return;
             }
@@ -362,7 +364,8 @@ class MusicPlayerController extends ChangeNotifier {
                   .toList();
               _queue = ids
                   .map(
-                    (id) => _tracks.where((track) => track.id == id).firstOrNull,
+                    (id) =>
+                        _tracks.where((track) => track.id == id).firstOrNull,
                   )
                   .whereType<MusicTrack>()
                   .toList();
@@ -459,10 +462,14 @@ class MusicPlayerController extends ChangeNotifier {
 
     final data = result.data?['deleteRoom'];
     final success =
-        !result.hasException && data is Map<String, dynamic> && data['success'] == true;
+        !result.hasException &&
+        data is Map<String, dynamic> &&
+        data['success'] == true;
 
     if (!success) {
-      final message = data is Map<String, dynamic> ? data['message'] as String? : null;
+      final message = data is Map<String, dynamic>
+          ? data['message'] as String?
+          : null;
       _statusMessage = message ?? 'Could not delete the room.';
       notifyListeners();
       return false;
@@ -495,10 +502,14 @@ class MusicPlayerController extends ChangeNotifier {
 
     final data = result.data?['transferHost'];
     final success =
-        !result.hasException && data is Map<String, dynamic> && data['success'] == true;
+        !result.hasException &&
+        data is Map<String, dynamic> &&
+        data['success'] == true;
 
     if (!success) {
-      final message = data is Map<String, dynamic> ? data['message'] as String? : null;
+      final message = data is Map<String, dynamic>
+          ? data['message'] as String?
+          : null;
       _statusMessage = message ?? 'Could not transfer host.';
       notifyListeners();
       return false;
@@ -572,7 +583,10 @@ class MusicPlayerController extends ChangeNotifier {
   /// stops following future vote changes.
   Future<bool> unlinkVoteEvent() async {
     if (_activeRoomId == null) return false;
-    final success = await _sendRoomAction(_unlinkVoteEventMutation, 'unlinkVoteEvent');
+    final success = await _sendRoomAction(
+      _unlinkVoteEventMutation,
+      'unlinkVoteEvent',
+    );
     if (success) {
       _linkedVoteEventId = null;
       notifyListeners();

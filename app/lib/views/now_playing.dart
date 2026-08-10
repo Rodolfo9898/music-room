@@ -225,9 +225,7 @@ Future<void> _showTransferHostSheet(
   final success = await player.transferHost(targetId);
   messenger.showSnackBar(
     SnackBar(
-      content: Text(
-        success ? 'Host transferred.' : 'Could not transfer host.',
-      ),
+      content: Text(success ? 'Host transferred.' : 'Could not transfer host.'),
     ),
   );
 }
@@ -319,9 +317,7 @@ class _ExpandedPlayerControls extends StatelessWidget {
               ? const Color(0xFFFF7A45)
               : const Color(0xFF98A2B3),
           icon: Icon(
-            player.isMuted
-                ? Icons.volume_off_rounded
-                : Icons.volume_up_rounded,
+            player.isMuted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
           ),
         ),
         const SizedBox(height: 14),

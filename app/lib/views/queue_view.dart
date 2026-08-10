@@ -33,7 +33,9 @@ class QueueView extends StatelessWidget {
     final linkedVoteEventId = player.linkedVoteEventId;
     // Changing the room's current track is reserved to the host; members can
     // only view the queue.
-    final canControl = (!player.hasActiveRoom || player.isRoomHost) && player.linkedVoteEventId == null;
+    final canControl =
+        (!player.hasActiveRoom || player.isRoomHost) &&
+        player.linkedVoteEventId == null;
 
     return Scaffold(
       backgroundColor: const Color(0xFF090B11),

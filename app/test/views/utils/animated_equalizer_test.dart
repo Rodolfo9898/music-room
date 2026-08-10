@@ -4,18 +4,18 @@ import 'package:pmr_music_room/views/utils/animated_equalizer.dart';
 
 List<double> _barHeights(WidgetTester tester) {
   return tester
-      .widgetList<Container>(find.descendant(
-        of: find.byType(AnimatedEqualizer),
-        matching: find.byType(Container),
-      ))
+      .widgetList<Container>(
+        find.descendant(
+          of: find.byType(AnimatedEqualizer),
+          matching: find.byType(Container),
+        ),
+      )
       .map((container) => (container.constraints?.maxHeight) ?? 0)
       .toList();
 }
 
 void main() {
-  testWidgets('renders barCount bars honoring size and color', (
-    tester,
-  ) async {
+  testWidgets('renders barCount bars honoring size and color', (tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Center(

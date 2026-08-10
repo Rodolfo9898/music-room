@@ -69,7 +69,9 @@ class _AddToTrackVoteSheetState extends State<_AddToTrackVoteSheet> {
         ? 'Added to "${event.name}"'
         : (result.message ?? 'Failed to add to "${event.name}"');
 
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -136,9 +138,7 @@ class _AddToTrackVoteSheetState extends State<_AddToTrackVoteSheet> {
                   return ListTile(
                     key: ValueKey('add_to_track_vote_tile_${event.id}'),
                     leading: Icon(
-                      event.isPublic
-                          ? Icons.how_to_vote
-                          : Icons.lock_outline,
+                      event.isPublic ? Icons.how_to_vote : Icons.lock_outline,
                       color: Colors.white54,
                     ),
                     title: Text(

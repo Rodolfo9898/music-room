@@ -106,10 +106,7 @@ void main() {
     });
 
     test('DeviceRecord.fromJson handles empty delegate_ids gracefully', () {
-      final device = DeviceRecord.fromJson({
-        'id': 1,
-        'delegate_ids': '',
-      });
+      final device = DeviceRecord.fromJson({'id': 1, 'delegate_ids': ''});
 
       expect(device.delegateIds, isEmpty);
     });
@@ -166,7 +163,11 @@ void main() {
   group('AccountService.login', () {
     test('returns success with login information on HTTP 200', () async {
       when(
-        () => mockClient.post(any(), headers: any(named: 'headers'), body: any(named: 'body')),
+        () => mockClient.post(
+          any(),
+          headers: any(named: 'headers'),
+          body: any(named: 'body'),
+        ),
       ).thenAnswer(
         (_) async => _jsonResponse({
           'data': {
@@ -190,7 +191,11 @@ void main() {
 
     test('returns failure with server-provided error message/code', () async {
       when(
-        () => mockClient.post(any(), headers: any(named: 'headers'), body: any(named: 'body')),
+        () => mockClient.post(
+          any(),
+          headers: any(named: 'headers'),
+          body: any(named: 'body'),
+        ),
       ).thenAnswer(
         (_) async => _jsonResponse({
           'error': 'EMAIL_NOT_VERIFIED',
@@ -210,7 +215,11 @@ void main() {
 
     test('returns a network-error message when the request throws', () async {
       when(
-        () => mockClient.post(any(), headers: any(named: 'headers'), body: any(named: 'body')),
+        () => mockClient.post(
+          any(),
+          headers: any(named: 'headers'),
+          body: any(named: 'body'),
+        ),
       ).thenThrow(Exception('boom'));
 
       final result = await withMockClient(
@@ -221,25 +230,36 @@ void main() {
       expect(result.message, contains('Network error'));
     });
 
-    test('falls back to a generic message when the body has no message', () async {
-      when(
-        () => mockClient.post(any(), headers: any(named: 'headers'), body: any(named: 'body')),
-      ).thenAnswer((_) async => _jsonResponse({}, 400));
+    test(
+      'falls back to a generic message when the body has no message',
+      () async {
+        when(
+          () => mockClient.post(
+            any(),
+            headers: any(named: 'headers'),
+            body: any(named: 'body'),
+          ),
+        ).thenAnswer((_) async => _jsonResponse({}, 400));
 
-      final result = await withMockClient(
-        () => AccountService.login('user@example.com', 'password'),
-      );
+        final result = await withMockClient(
+          () => AccountService.login('user@example.com', 'password'),
+        );
 
-      expect(result.success, false);
-      expect(result.errorCode, isNull);
-      expect(result.message, 'Unable to login with these credentials.');
-    });
+        expect(result.success, false);
+        expect(result.errorCode, isNull);
+        expect(result.message, 'Unable to login with these credentials.');
+      },
+    );
   });
 
   group('AccountService.signup', () {
     test('returns success message on HTTP 200/201', () async {
       when(
-        () => mockClient.post(any(), headers: any(named: 'headers'), body: any(named: 'body')),
+        () => mockClient.post(
+          any(),
+          headers: any(named: 'headers'),
+          body: any(named: 'body'),
+        ),
       ).thenAnswer((_) async => _jsonResponse({}, 201));
 
       final result = await withMockClient(
@@ -257,7 +277,11 @@ void main() {
 
     test('returns failure with server error on non-2xx', () async {
       when(
-        () => mockClient.post(any(), headers: any(named: 'headers'), body: any(named: 'body')),
+        () => mockClient.post(
+          any(),
+          headers: any(named: 'headers'),
+          body: any(named: 'body'),
+        ),
       ).thenAnswer(
         (_) async => _jsonResponse({'message': 'Email already used.'}, 409),
       );
@@ -317,7 +341,11 @@ void main() {
   group('AccountService.updateDisplayName', () {
     test('returns success with updated display name', () async {
       when(
-        () => mockClient.patch(any(), headers: any(named: 'headers'), body: any(named: 'body')),
+        () => mockClient.patch(
+          any(),
+          headers: any(named: 'headers'),
+          body: any(named: 'body'),
+        ),
       ).thenAnswer(
         (_) async => _jsonResponse({
           'data': {'displayName': 'New Name'},
@@ -336,7 +364,11 @@ void main() {
   group('AccountService.refreshToken', () {
     test('returns success with refreshed login information', () async {
       when(
-        () => mockClient.post(any(), headers: any(named: 'headers'), body: any(named: 'body')),
+        () => mockClient.post(
+          any(),
+          headers: any(named: 'headers'),
+          body: any(named: 'body'),
+        ),
       ).thenAnswer(
         (_) async => _jsonResponse({
           'data': {
@@ -357,7 +389,11 @@ void main() {
 
     test('returns failure when the session is no longer valid', () async {
       when(
-        () => mockClient.post(any(), headers: any(named: 'headers'), body: any(named: 'body')),
+        () => mockClient.post(
+          any(),
+          headers: any(named: 'headers'),
+          body: any(named: 'body'),
+        ),
       ).thenAnswer((_) async => _jsonResponse({}, 401));
 
       final result = await withMockClient(() => AccountService.refreshToken());
@@ -412,15 +448,20 @@ void main() {
       expect(friends.first.status, 'ACCEPTED');
     });
 
-    test('fetchFriends returns an empty list on failure status codes', () async {
-      when(
-        () => mockClient.get(any(), headers: any(named: 'headers')),
-      ).thenAnswer((_) async => _jsonResponse({}, 403));
+    test(
+      'fetchFriends returns an empty list on failure status codes',
+      () async {
+        when(
+          () => mockClient.get(any(), headers: any(named: 'headers')),
+        ).thenAnswer((_) async => _jsonResponse({}, 403));
 
-      final friends = await withMockClient(() => AccountService.fetchFriends());
+        final friends = await withMockClient(
+          () => AccountService.fetchFriends(),
+        );
 
-      expect(friends, isEmpty);
-    });
+        expect(friends, isEmpty);
+      },
+    );
 
     test('fetchDevices parses the returned list', () async {
       when(

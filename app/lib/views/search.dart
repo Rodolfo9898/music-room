@@ -158,7 +158,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     selected: _selectedTab == _SearchTab.music,
                     onSelected: (_) =>
                         setState(() => _selectedTab = _SearchTab.music),
-                    showCheckmark: false
+                    showCheckmark: false,
                   ),
                   const SizedBox(width: 8),
                   ChoiceChip(
@@ -166,7 +166,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     selected: _selectedTab == _SearchTab.playlists,
                     onSelected: (_) =>
                         setState(() => _selectedTab = _SearchTab.playlists),
-                    showCheckmark: false
+                    showCheckmark: false,
                   ),
                   const SizedBox(width: 8),
                   ChoiceChip(
@@ -174,7 +174,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     selected: _selectedTab == _SearchTab.voteEvents,
                     onSelected: (_) =>
                         setState(() => _selectedTab = _SearchTab.voteEvents),
-                    showCheckmark: false
+                    showCheckmark: false,
                   ),
                 ],
               ),

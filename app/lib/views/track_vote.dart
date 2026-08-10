@@ -178,7 +178,12 @@ class SuggestTrackResult {
   bool get isSuccess => outcome == SuggestTrackOutcome.success;
 }
 
-enum LocationAccessStatus { granted, serviceDisabled, permissionDenied, permissionDeniedForever }
+enum LocationAccessStatus {
+  granted,
+  serviceDisabled,
+  permissionDenied,
+  permissionDeniedForever,
+}
 
 class LocationAccessResult {
   final LocationAccessStatus status;
@@ -233,7 +238,9 @@ Future<LocationAccessResult> requestCurrentLocation() async {
     permission = await Geolocator.requestPermission();
   }
   if (permission == LocationPermission.deniedForever) {
-    return const LocationAccessResult(LocationAccessStatus.permissionDeniedForever);
+    return const LocationAccessResult(
+      LocationAccessStatus.permissionDeniedForever,
+    );
   }
   if (permission == LocationPermission.denied) {
     return const LocationAccessResult(LocationAccessStatus.permissionDenied);

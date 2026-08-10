@@ -28,9 +28,7 @@ void main() {
         contains("haven't been invited"),
       );
       expect(
-        buildEvent(
-          canVoteReason: 'WINDOW_NOT_CONFIGURED',
-        ).canVoteReasonMessage,
+        buildEvent(canVoteReason: 'WINDOW_NOT_CONFIGURED').canVoteReasonMessage,
         contains('voting window'),
       );
       expect(
@@ -96,10 +94,7 @@ void main() {
 
     test('is manageable for private events regardless of vote policy', () {
       expect(
-        eventWith(
-          votePolicy: 'EVERYONE',
-          isPublic: false,
-        ).membersManageable,
+        eventWith(votePolicy: 'EVERYONE', isPublic: false).membersManageable,
         isTrue,
       );
       expect(

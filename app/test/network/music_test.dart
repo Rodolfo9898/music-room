@@ -51,14 +51,17 @@ void main() {
       expect(track.streamUrl, 'https://cdn.example.com/track.mp3');
     });
 
-    test('streamUrl resolves a leading-slash relative path against the server', () {
-      final track = MusicTrack.fromJson({
-        'id': 1,
-        'streamUrl': '/static/track.mp3',
-      });
-      expect(track.streamUrl, endsWith('/static/track.mp3'));
-      expect(track.streamUrl, isNot(startsWith('/')));
-    });
+    test(
+      'streamUrl resolves a leading-slash relative path against the server',
+      () {
+        final track = MusicTrack.fromJson({
+          'id': 1,
+          'streamUrl': '/static/track.mp3',
+        });
+        expect(track.streamUrl, endsWith('/static/track.mp3'));
+        expect(track.streamUrl, isNot(startsWith('/')));
+      },
+    );
 
     test('streamUrl resolves a bare relative path against the server', () {
       final track = MusicTrack.fromJson({
@@ -176,7 +179,9 @@ void main() {
 
       when(() => mockClient.query(any())).thenAnswer(
         (_) async => QueryResult(
-          options: QueryOptions(document: gql('query { searchMusics(query: "") { id } }')),
+          options: QueryOptions(
+            document: gql('query { searchMusics(query: "") { id } }'),
+          ),
           source: QueryResultSource.network,
           data: {
             'searchMusics': [
@@ -215,9 +220,9 @@ void main() {
 
     test('returns an empty list on failure status codes', () async {
       final mockHttp = MockHttpClient();
-      when(() => mockHttp.get(any())).thenAnswer(
-        (_) async => _jsonResponse({}, 500),
-      );
+      when(
+        () => mockHttp.get(any()),
+      ).thenAnswer((_) async => _jsonResponse({}, 500));
 
       final genres = await http.runWithClient(
         () => MusicService.fetchGenres(),

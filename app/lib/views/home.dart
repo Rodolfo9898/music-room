@@ -415,7 +415,6 @@ class _LiveRoomsSection extends StatefulWidget {
   final int? currentUserId;
 
   const _LiveRoomsSection({
-    super.key,
     required this.onJoinRoom,
     required this.onLeaveRoom,
     required this.currentUserId,

@@ -235,9 +235,7 @@ class _MyPlaylistsScreenState extends State<MyPlaylistsScreen> {
                       extra: PlaylistScreenArgs(
                         title: playlist.name,
                         subtitle:
-                        '${playlist.trackCount} track${playlist.trackCount == 1
-                            ? ''
-                            : 's'}',
+                            '${playlist.trackCount} track${playlist.trackCount == 1 ? '' : 's'}',
                         playlistId: playlist.id,
                       ),
                     );

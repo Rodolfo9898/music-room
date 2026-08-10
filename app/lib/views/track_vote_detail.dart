@@ -141,7 +141,9 @@ class _VoteEventScreenState extends State<VoteEventScreen> {
   }
 
   Future<void> _unlinkFromLiveRoom() async {
-    final unlinked = await context.read<MusicPlayerController>().unlinkVoteEvent();
+    final unlinked = await context
+        .read<MusicPlayerController>()
+        .unlinkVoteEvent();
     if (!mounted) return;
     _message(
       unlinked
@@ -182,7 +184,8 @@ class _VoteEventScreenState extends State<VoteEventScreen> {
       ),
     );
     if (!mounted) return;
-    final success = !result.hasException && result.data?['deleteVoteEvent'] == true;
+    final success =
+        !result.hasException && result.data?['deleteVoteEvent'] == true;
     if (!success) {
       _message('Could not delete this event.');
       return;
@@ -194,7 +197,7 @@ class _VoteEventScreenState extends State<VoteEventScreen> {
   Widget build(BuildContext context) {
     final client = GraphQLConnection().client!;
     final player = context.watch<MusicPlayerController>();
-    return  GraphQLProvider(
+    return GraphQLProvider(
       client: client,
       child: Subscription(
         options: SubscriptionOptions(
@@ -203,128 +206,139 @@ class _VoteEventScreenState extends State<VoteEventScreen> {
             'eventId': _event!.id,
             'latitude': _subscriptionLatitude,
             'longitude': _subscriptionLongitude,
-            },
-          ),
-          builder: (result) {
-            final raw = result.data?['voteEventUpdated'];
-            if (raw is Map<String, dynamic>) _event = VoteEvent.fromJson(raw);
-            return MusicRoomScaffold(
-              appBar: AppBar(
-                title: Text(_event!.name),
-                actions: [
-                  IconButton(
-                    key: const Key('track_vote_members_button'),
-                    tooltip: _event!.membersManageable ? 'Members' : 'Voters',
-                    onPressed: () => context.push(
-                      VoteEventMembersScreen.routeName,
-                      extra: _event!,
-                    ),
-                    icon: const Icon(Icons.people_outline),
+          },
+        ),
+        builder: (result) {
+          final raw = result.data?['voteEventUpdated'];
+          if (raw is Map<String, dynamic>) _event = VoteEvent.fromJson(raw);
+          return MusicRoomScaffold(
+            appBar: AppBar(
+              title: Text(_event!.name),
+              actions: [
+                IconButton(
+                  key: const Key('track_vote_members_button'),
+                  tooltip: _event!.membersManageable ? 'Members' : 'Voters',
+                  onPressed: () => context.push(
+                    VoteEventMembersScreen.routeName,
+                    extra: _event!,
                   ),
-                  if (_event!.ownerId == _accountId)
-                    IconButton(
-                      key: const Key('track_vote_delete_button'),
-                      tooltip: 'Delete event',
-                      onPressed: _confirmDelete,
-                      icon: const Icon(Icons.delete_outline),
-                    ),
-                ],
-              ),
-              floatingActionButton: _event!.canVote
-                  ? FloatingActionButton.extended(
-                key: const Key('track_vote_suggest_button'),
-                onPressed: _suggest,
-                icon: const Icon(Icons.add),
-                label: const Text('Suggest'),
-              )
-                  : null,
-              body: _event == null ?
-                Text('An error occured'):
-            ListView(
-                padding: const EdgeInsets.all(20),
-                children: [
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(18),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            _event!.isPublic ? 'Public event' : 'Private event',
-                            style: Theme.of(context).textTheme.titleLarge,
+                  icon: const Icon(Icons.people_outline),
+                ),
+                if (_event!.ownerId == _accountId)
+                  IconButton(
+                    key: const Key('track_vote_delete_button'),
+                    tooltip: 'Delete event',
+                    onPressed: _confirmDelete,
+                    icon: const Icon(Icons.delete_outline),
+                  ),
+              ],
+            ),
+            floatingActionButton: _event!.canVote
+                ? FloatingActionButton.extended(
+                    key: const Key('track_vote_suggest_button'),
+                    onPressed: _suggest,
+                    icon: const Icon(Icons.add),
+                    label: const Text('Suggest'),
+                  )
+                : null,
+            body: _event == null
+                ? Text('An error occured')
+                : ListView(
+                    padding: const EdgeInsets.all(20),
+                    children: [
+                      Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(18),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _event!.isPublic
+                                    ? 'Public event'
+                                    : 'Private event',
+                                style: Theme.of(context).textTheme.titleLarge,
+                              ),
+                              const SizedBox(height: 6),
+                              Text(_event!.policyLabel),
+                              if (!_event!.canVote)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 8),
+                                  child: Text(
+                                    _event!.canVoteReasonMessage,
+                                    style: const TextStyle(
+                                      color: Colors.orange,
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
-                          const SizedBox(height: 6),
-                          Text(_event!.policyLabel),
-                          if (!_event!.canVote)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 8),
-                              child: Text(
-                                _event!.canVoteReasonMessage,
-                                style: const TextStyle(color: Colors.orange),
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      Text(
+                        'Live ranking',
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                      if (_event!.ownerId == _accountId &&
+                          _event!.tracks.isNotEmpty &&
+                          !(player.linkedVoteEventId == _event!.id)) ...[
+                        const SizedBox(height: 10),
+                        FilledButton.icon(
+                          key: const Key('track_vote_play_ranking_button'),
+                          onPressed: () => _playRanking(_event!),
+                          icon: const Icon(Icons.play_arrow),
+                          label: const Text('Play ranking in live room'),
+                        ),
+                      ],
+                      if (_event!.ownerId == _accountId &&
+                          player.linkedVoteEventId == _event!.id) ...[
+                        const SizedBox(height: 10),
+                        OutlinedButton.icon(
+                          key: const Key('track_vote_unlink_button'),
+                          onPressed: _unlinkFromLiveRoom,
+                          icon: const Icon(Icons.link_off),
+                          label: const Text('Unlink from live room'),
+                        ),
+                      ],
+                      const SizedBox(height: 10),
+                      if (_event!.tracks.isEmpty)
+                        const Text('No suggestions yet.'),
+                      ..._event!.tracks.asMap().entries.map((entry) {
+                        final selected = _event!.userVoteMusicIds.contains(
+                          entry.value.musicId,
+                        );
+                        return Card(
+                          key: ValueKey(
+                            'track_vote_track_${entry.value.musicId}',
+                          ),
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              child: Text('${entry.key + 1}'),
+                            ),
+                            title: Text(entry.value.title),
+                            subtitle: Text(
+                              '${entry.value.artist} · ${entry.value.votes} votes',
+                            ),
+                            trailing: IconButton.filledTonal(
+                              key: ValueKey(
+                                'track_vote_vote_button_${entry.value.musicId}',
+                              ),
+                              onPressed: _event!.canVote
+                                  ? () => _vote(entry.value.musicId)
+                                  : null,
+                              icon: Icon(
+                                selected ? Icons.check : Icons.how_to_vote,
+                                color: selected ? Colors.green : null,
                               ),
                             ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  Text(
-                    'Live ranking',
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  if (_event!.ownerId == _accountId && _event!.tracks.isNotEmpty && !(player.linkedVoteEventId == _event!.id)) ...[
-                    const SizedBox(height: 10),
-                    FilledButton.icon(
-                      key: const Key('track_vote_play_ranking_button'),
-                      onPressed: () => _playRanking(_event!),
-                      icon: const Icon(Icons.play_arrow),
-                      label: const Text('Play ranking in live room'),
-                    ),
-                  ],
-                  if (_event!.ownerId == _accountId &&
-                      player.linkedVoteEventId == _event!.id) ...[
-                    const SizedBox(height: 10),
-                    OutlinedButton.icon(
-                      key: const Key('track_vote_unlink_button'),
-                      onPressed: _unlinkFromLiveRoom,
-                      icon: const Icon(Icons.link_off),
-                      label: const Text('Unlink from live room'),
-                    ),
-                  ],
-                  const SizedBox(height: 10),
-                  if (_event!.tracks.isEmpty) const Text('No suggestions yet.'),
-                  ..._event!.tracks.asMap().entries.map((entry) {
-                    final selected = _event!.userVoteMusicIds.contains(
-                      entry.value.musicId,
-                    );
-                    return Card(
-                      key: ValueKey('track_vote_track_${entry.value.musicId}'),
-                      child: ListTile(
-                        leading: CircleAvatar(child: Text('${entry.key + 1}')),
-                        title: Text(entry.value.title),
-                        subtitle: Text(
-                          '${entry.value.artist} · ${entry.value.votes} votes',
-                        ),
-                        trailing: IconButton.filledTonal(
-                          key: ValueKey(
-                            'track_vote_vote_button_${entry.value.musicId}',
                           ),
-                          onPressed: _event!.canVote
-                              ? () => _vote(entry.value.musicId)
-                              : null,
-                          icon: Icon(
-                            selected ? Icons.check : Icons.how_to_vote,
-                            color: selected ? Colors.green : null,
-                          ),
-                        ),
-                      ),
-                    );
-                  }),
-                ],
-              )
-            );
-          }
-      )
+                        );
+                      }),
+                    ],
+                  ),
+          );
+        },
+      ),
     );
   }
 
@@ -339,8 +353,7 @@ class VoteEventMembersScreen extends StatefulWidget {
   const VoteEventMembersScreen({super.key, required this.initialEvent});
 
   @override
-  State<VoteEventMembersScreen> createState() =>
-      _VoteEventMembersScreenState();
+  State<VoteEventMembersScreen> createState() => _VoteEventMembersScreenState();
 }
 
 class _VoteEventMembersScreenState extends State<VoteEventMembersScreen> {

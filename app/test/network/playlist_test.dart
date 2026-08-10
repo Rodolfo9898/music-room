@@ -161,7 +161,9 @@ void main() {
 
       when(() => mockClient.mutate(any())).thenAnswer(
         (_) async => QueryResult(
-          options: MutationOptions(document: gql('mutation { createPlaylist { id } }')),
+          options: MutationOptions(
+            document: gql('mutation { createPlaylist { id } }'),
+          ),
           source: QueryResultSource.network,
           data: {
             'createPlaylist': {
@@ -187,7 +189,9 @@ void main() {
 
       when(() => mockClient.mutate(any())).thenAnswer(
         (_) async => QueryResult(
-          options: MutationOptions(document: gql('mutation { createPlaylist { id } }')),
+          options: MutationOptions(
+            document: gql('mutation { createPlaylist { id } }'),
+          ),
           source: QueryResultSource.network,
           exception: OperationException(
             graphqlErrors: [const GraphQLError(message: 'Name already taken')],
@@ -201,14 +205,17 @@ void main() {
       expect(result.error, 'Name already taken');
     });
 
-    test('returns a connectivity error when no client is initialized', () async {
-      GraphQLConnection().client = null;
+    test(
+      'returns a connectivity error when no client is initialized',
+      () async {
+        GraphQLConnection().client = null;
 
-      final result = await PlaylistService.createPlaylist('New', true);
+        final result = await PlaylistService.createPlaylist('New', true);
 
-      expect(result.playlist, isNull);
-      expect(result.error, 'Could not reach the server.');
-    });
+        expect(result.playlist, isNull);
+        expect(result.error, 'Could not reach the server.');
+      },
+    );
   });
 
   group('PlaylistService.addTrack / removeTrack', () {
@@ -218,7 +225,9 @@ void main() {
 
       when(() => mockClient.mutate(any())).thenAnswer(
         (_) async => QueryResult(
-          options: MutationOptions(document: gql('mutation { addTrackToPlaylist { id } }')),
+          options: MutationOptions(
+            document: gql('mutation { addTrackToPlaylist { id } }'),
+          ),
           source: QueryResultSource.network,
           data: {
             'addTrackToPlaylist': {
@@ -242,7 +251,9 @@ void main() {
 
       when(() => mockClient.mutate(any())).thenAnswer(
         (_) async => QueryResult(
-          options: MutationOptions(document: gql('mutation { removeTrackFromPlaylist { id } }')),
+          options: MutationOptions(
+            document: gql('mutation { removeTrackFromPlaylist { id } }'),
+          ),
           source: QueryResultSource.network,
           exception: OperationException(
             linkException: const ServerException(originalException: 'boom'),
