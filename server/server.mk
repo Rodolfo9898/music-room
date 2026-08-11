@@ -7,11 +7,11 @@ install-server:
 	cd server && npm install
 
 run-server:
-    ifeq ($(REMOTE_DB),1)
-        docker compose run --rm --no-deps --service-ports backend npm run dev
-    else
-        docker compose up --build backend
-    endif
+	ifeq ($(REMOTE_DB),1)
+		docker compose run --rm --no-deps --service-ports backend npm run dev
+	else
+		docker compose up --build backend
+	endif
 
 backend-up: musics
 	docker compose up -d --build --wait backend
@@ -64,5 +64,5 @@ test-load: project-up
 # delegation) instead of generic read traffic: see test/load/feature-ramp-up.js and
 # test/load/run-feature-ramp-up.sh for details on why each (scenario, stage) runs in
 # its own container with its own static IP.
-test-load-features: project-up
+test-load-features: project-up test-load
 	server/test/load/run-feature-ramp-up.sh

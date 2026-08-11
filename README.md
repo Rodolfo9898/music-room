@@ -24,13 +24,8 @@ Quick start: Do steps 1 to 5 of the app runbook.
 
 ## Run the tests
 
-Use [server/RUN.md](server/RUN.md) and [app/integration_test/README.md](app/integration_test/README.md)
-for the complete test runbook and environment prerequisites.
-
-If you prefer root-level Make commands, list available targets with `make help`
-and use the test-related target names from your local setup.
-
-Or run directly in each project:
-- `cd server && npm test`
-- `cd app && flutter test`
-- `cd app && flutter test integration_test`
+Run directly in each project:
+- `make test-server` -> server integration tests
+- `make test-app` -> Flutter unit tests
+- `make test-e2e` -> end-to-end tests
+- `make test-load-features` -> ramp up tests
