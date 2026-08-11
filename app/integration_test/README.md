@@ -154,8 +154,35 @@ mailbox.
 
 ## Required configuration
 
-None of the following are hardcoded or committed. Export them in your shell
-before running the suite, or pass them inline:
+None of the following are hardcoded or committed. **Recommended: put them in
+`app/.env`** (gitignored, never committed) — `make test-e2e` reads that file
+directly (both for Flutter's own `--dart-define-from-file=.env` and, via
+`app/scripts/export-env.sh`, for the Makefile's own presence check), so no
+manual `export`ing is required:
+
+```sh
+# app/.env
+E2E_TEST_EMAIL="..."
+E2E_IMAP_PASSWORD='...'
+E2E_SECOND_TEST_EMAIL="..."
+E2E_SECOND_IMAP_PASSWORD='...'
+```
+
+```sh
+make test-e2e DEVICE=<device-id>
+```
+
+`app/scripts/export-env.sh` is a small, generic `.env` parser (skips
+comments/blank lines, exports every `KEY=VALUE` line, stripping at most one
+matching pair of surrounding quotes) that leaves values otherwise untouched —
+safe for passwords containing `$`, `` ` ``, `&`, `#`, `'`, etc. It must be
+*sourced*, not executed (e.g. `. app/scripts/export-env.sh app/.env`), since
+`export` only affects the current shell.
+
+Alternatively, you can **export them as real shell environment variables**
+before running the suite instead of using `app/.env` (see the warning below
+for why this matters, especially if a password contains `$`, `` ` ``, `\`, or
+`"`):
 
 | Variable             | Required | Notes                                              |
 |-----------------------|----------|-----------------------------------------------------|
@@ -167,6 +194,26 @@ before running the suite, or pass them inline:
 | `E2E_SECOND_TEST_EMAIL`     | only for `track_vote_lifecycle_test.dart`, `track_vote_visibility_policy_regression_test.dart`, `track_vote_member_removal_regression_test.dart` | Defaults to the dedicated project test mailbox |
 | `E2E_SECOND_TEST_PASSWORD`  | only for `track_vote_lifecycle_test.dart`, `track_vote_visibility_policy_regression_test.dart`, `track_vote_member_removal_regression_test.dart` | Signup/signin password for the second mailbox  |
 | `E2E_SECOND_IMAP_PASSWORD`  | only for `track_vote_lifecycle_test.dart`, `track_vote_visibility_policy_regression_test.dart`, `track_vote_member_removal_regression_test.dart` | IMAP password for the second mailbox (same server as `E2E_IMAP_HOST`/`E2E_IMAP_PORT`) |
+
+> **Important — use `export`, not `make VAR=value`.** Real mailbox passwords
+> often contain shell-special characters (`$`, `` ` ``, `&`, `#`, ...). GNU
+> Make always re-expands the value of any variable assigned on its own
+> command line (`make test-e2e E2E_IMAP_PASSWORD='...'`) when exporting it to
+> the recipe's environment — a literal `$something` inside the password will
+> silently be replaced with the (usually empty) expansion of a shell/make
+> variable named `something`, corrupting the credential before Flutter ever
+> sees it. This happens regardless of quoting and is not something the
+> Makefile can prevent. Always `export` these variables in your shell first
+> (or prefix the command, e.g. `E2E_IMAP_PASSWORD='...' make test-e2e ...`)
+> so the value reaches `make`/Flutter via the process environment untouched,
+> e.g.:
+> ```sh
+> export E2E_TEST_EMAIL="..."
+> export E2E_IMAP_PASSWORD='...'
+> export E2E_SECOND_TEST_EMAIL="..."
+> export E2E_SECOND_IMAP_PASSWORD='...'
+> make test-e2e DEVICE=<device-id>
+> ```
 
 ## Running
 
@@ -190,15 +237,18 @@ flutter test integration_test/ \
   --dart-define=E2E_IMAP_PASSWORD="$E2E_IMAP_PASSWORD"
 ```
 
-Or simply:
+Or simply, with the required variables set in `app/.env` (or already
+`export`-ed as above):
 
 ```sh
 make test-e2e DEVICE=<device-id>
 ```
 
-(see the Makefile target — it wires the env vars above through automatically
-and defaults `MUSIC_ROOM_SERVER` the same way `run-app` does for Android
-emulators, and now runs every suite under `integration_test/`).
+(see the Makefile target — it sources `app/scripts/export-env.sh` against
+`app/.env`, wiring the env vars above through automatically, defaults
+`MUSIC_ROOM_SERVER` the same way `run-app` does for Android emulators, and
+runs every suite under `integration_test/`).
+
 
 ## Notes
 

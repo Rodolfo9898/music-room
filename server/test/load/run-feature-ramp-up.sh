@@ -26,6 +26,7 @@ SERVER_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 ENV_FILE="$SERVER_DIR/.env"
 NETWORK="${LOAD_NETWORK:-music-room_default}"
 IP_PREFIX="${LOAD_IP_PREFIX:-172.19.9}" # must be free within the compose network's subnet
+NODE_MODULES_VOLUME="${LOAD_NODE_MODULES_VOLUME:-music-room_server_node_modules}"
 
 if [ ! -f "$ENV_FILE" ]; then
 	echo "Missing $ENV_FILE" >&2
@@ -36,15 +37,28 @@ IFS=',' read -ra STAGE_LIST <<< "$STAGES"
 RESULTS_FILE="$(mktemp)"
 trap 'rm -f "$RESULTS_FILE"' EXIT
 
+# feature-ramp-up.js requires jsonwebtoken/bcrypt/mariadb (unlike ramp-up.js,
+# which only uses Node builtins). Install once into a shared named volume so
+# every per-scenario container below has node_modules available without
+# re-running npm ci 12 times.
+docker run --rm \
+	-v "$SERVER_DIR:/app" \
+	-v "$NODE_MODULES_VOLUME:/app/node_modules" \
+	-w /app \
+	node:22-bookworm-slim \
+	npm ci
+
 ip_octet=10
 for scenario in vote playlist host; do
 	for users in "${STAGE_LIST[@]}"; do
 		echo "== scenario=$scenario users=$users (ip $IP_PREFIX.$ip_octet) ==" >&2
 		docker run --rm --network "$NETWORK" --ip "$IP_PREFIX.$ip_octet" \
-			-v "$SERVER_DIR:/app" -w /app \
+			-v "$SERVER_DIR:/app" \
+			-v "$NODE_MODULES_VOLUME:/app/node_modules" \
+			-w /app \
 			--env-file "$ENV_FILE" \
 			-e LOAD_BASE_URL="http://$BACKEND" \
-			-e DB_HOST=mariadb -e DB_PORT=3306 -e DB_USER=music_user -e DB_PASS=music_pass -e DB_NAME=MusicRoom \
+			-e DB_PORT=3306 \
 			-e LOAD_SCENARIO="$scenario" -e LOAD_USERS="$users" \
 			node:22-bookworm-slim node test/load/feature-ramp-up.js \
 			| tee -a "$RESULTS_FILE"
