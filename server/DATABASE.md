@@ -21,7 +21,7 @@ make db-migrate
 ```
 
 Connection settings are read from the ignored `server/.env`. Copy
-`server/.env-example`, provide strong local values, and keep it untracked.
+`./.env-example`, provide strong local values, and keep it untracked.
 Compose-first local usage expects `DB_HOST=mariadb`. For a remote database host,
 set `DB_HOST`/`DB_PORT`/credentials accordingly and run backend with
 `make run-server REMOTE_DB=1`.

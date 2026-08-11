@@ -3,6 +3,10 @@
 Flutter Android/web client plus a Node.js, GraphQL/WebSocket, and MariaDB
 backend for shared playlists, live rooms, and track-voting events.
 
+## Env config
+
+Create the `server/.env` and `app/.env` files from the respective `.env-example` file and set the required values.
+
 ## Run server and DB
 
 Use [server/RUN.md](server/RUN.md) for the full runbook (env preparation,
@@ -15,13 +19,8 @@ Quick start: Do steps 1, 2 and 3 of the server runbook.
 Use [app/RUN.md](app/RUN.md) for the full app runbook (Flutter setup,
 configuration, and platform-specific run flows).
 
-If you prefer root-level Make commands, list available targets with `make help`
-and use the app-related target names from your local setup.
+Quick start: Do steps 1 to 5 of the app runbook.
 
-Or run directly from the `app/` folder with Flutter:
-- `flutter pub get`
-- `flutter run -d chrome` (web)
-- `flutter run` (device/emulator)
 
 ## Run the tests
 

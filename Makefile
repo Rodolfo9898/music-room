@@ -5,7 +5,11 @@ APP_BACKEND ?= 10.0.2.2:8080
 include server/server.mk
 include app/app.mk
 
-.PHONY: help setup run-project project-up project-down install verify
+.DEFAULT_GOAL := default
+.PHONY: default help setup run-project project-up project-down install verify
+
+default:
+	@echo "Please read the README.md first"
 
 help:
 	@printf "Available targets:\n"

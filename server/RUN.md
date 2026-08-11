@@ -23,7 +23,7 @@ both `mariadb` and `backend` in `docker-compose.yml`.
 Create it from the example:
 
 ```sh
-cp server/.env-example server/.env
+cp ./.env-example server/.env
 ```
 
 Set at least the following before first start:
